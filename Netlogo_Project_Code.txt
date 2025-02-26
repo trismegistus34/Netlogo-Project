@@ -1,0 +1,99 @@
+patches-own [
+  countdown
+]
+
+to setup
+  clear-all
+  ask patches [ setup-train ]
+  setup-passengers
+  reset-ticks
+end
+
+to setup-train
+  if pycor < 5 and pycor > -5 [
+    set pcolor gray
+  ]
+  if (pycor = 4 or pycor = -4) and (pxcor > -12 and pxcor < 12) and remainder pxcor 2 = 0 [
+    set pcolor red
+    if pcolor = red
+    [
+      set countdown time-until-free
+    ]
+    if pcolor = green
+    [
+      set countdown random time-until-free
+    ]
+  ]
+end
+
+to setup-passengers
+  set-default-shape turtles "person"
+  create-turtles number-of-passengers [
+    set color blue
+    set heading 90
+    let choice random 2
+    if (choice = 0) [ set ycor 2 ]
+    if (choice = 1) [ set ycor -2 ]
+    set xcor random-xcor
+    separate-people
+  ]
+end
+
+to separate-people
+  if any? other turtles-here [
+    fd 1
+    separate-people
+  ]
+end
+
+to go
+  ask turtles [
+    fd 1
+  ]
+  check-seat
+  ask patches [
+   leave-seat
+  ]
+  tick
+end
+
+
+to check-seat
+  ask turtles [
+    if ycor = 2 and (pxcor > -11) [
+      move-to patch-left-and-ahead 90 2
+    ]
+    if pcolor = red
+    [
+      set pcolor green
+      die
+    ]
+
+   if ycor = 4 and (pxcor > 11)
+    [
+      move-to patch-right-and-ahead 90 2
+    ]
+    if ycor = -2 and (pxcor > -11) [
+      move-to patch-right-and-ahead 90 2
+    ]
+     if pcolor = red
+    [
+      set pcolor green
+      die
+    ]
+    if ycor = -4 and (pxcor > 11)
+    [
+      move-to patch-left-and-ahead 90 2
+    ]
+  ]
+end
+
+to leave-seat
+  if pcolor = green [
+    ifelse countdown <= 0
+    [ set pcolor red
+      set countdown time-until-free
+    ]
+    [ set countdown countdown - 1 ]
+  ]
+end
